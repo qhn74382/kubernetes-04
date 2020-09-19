@@ -1,0 +1,50 @@
+#cloudformation yaml
+
+#ssh into master
+
+mkdir microservices
+cd microservices/
+TOKEN="XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+FOLDER="https://$TOKEN@raw.githubusercontent.com/clarusway/clarusway-aws-devops-1-20/master/devops/hands-on/kubernetes-04-microservice-deployment-and-autoscaling/"
+curl -s --create-dirs -o "/home/ubuntu/microservices/microservices.tar.gz" -L "$FOLDER"microservices-yaml-files.tar.gz
+tar -xvf microservices.tar.gz
+
+
+cd ..
+kubectl apply -f to-do
+deployment.apps/db-deployment created
+persistentvolume/db-pv-vol created
+persistentvolumeclaim/database-persistent-volume-claim created
+service/db-service created
+deployment.apps/web-deployment created
+service/web-service created
+
+nano ~/.bashrc
+source ~/.bashrc
+
+alias k='kubectl'
+alias kpods='kubectl get pods'
+alias klogs='kubectl logs'
+alias kd='kubectl describe'
+
+OR
+
+source <(kubectl completion bash) # setup autocomplete in bash into the current shell, bash-completion package should be installed first.
+echo "source <(kubectl completion bash)" >> ~/.bashrc # add autocomplete permanently to your bash shell.
+alias k=kubectl
+complete -F __start_kubectl k
+
+#go to apache folder
+kubectl apply -f php-apache.yaml
+kubectl get svc
+
+#go to the browser using the port number from the php-apache
+workerIP add:port #
+
+#horizontal scale
+kubectl get hpa
+
+kubectl run -it --rm load-generator --image=busybox /bin/sh
+watch -n1 kubectl get hpa -o wide
+while true; do wget -q -O- http://<puplic ip>:<port number of php-apache-service>; done 
+watch -n3 kubectl get service,hpa,pod -o wide
